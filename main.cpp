@@ -4,7 +4,7 @@
 
 #include <SDL.h>
 #include <SDL_image.h>
-//#include <SDL_mixer.h>
+#include <SDL_mixer.h>
 //#include <SDL_ttf.h>
 #include "imgui.h"
 #include "imgui_impl_sdl.h"
@@ -24,15 +24,93 @@ return canvas.height;
 });
 #endif
 
+std::string getButtonLabel(int panState) {
+    switch (panState) {
+        case 0:
+            return "Center Pan";
+        case 1:
+            return "Full Left Pan";
+        case 2:
+            return "Full Right Pan";
+        default:
+            return "Unknown Pan State";
+    }
+}
+
 int main(int argc, char* argv[]) {
     // Unused argc, argv
     (void) argc;
     (void) argv;
 
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) != 0) {
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER | SDL_INIT_AUDIO) != 0) {
         printf("Error: %s\n", SDL_GetError());
         return -1;
     }
+
+    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0){
+        std::cerr << "SLD_mixer could not initialize! SDL_mixer Error: " << Mix_GetError() << std::endl;
+        return 1;
+    }
+
+    const char* tracka = "/Users/lucapetrosso/Repos/SDL2-CPM-CMake-Example/assets/SDLTrackA.wav";
+    Mix_Chunk* audioa = Mix_LoadWAV(tracka);
+    if(!audioa) {
+        std::cerr << "Failed to load TrackA! SDL_mixer Error: " << Mix_GetError() << std::endl;
+        return 1;
+    }
+    const char* trackb = "/Users/lucapetrosso/Repos/SDL2-CPM-CMake-Example/assets/SDLTrackB.wav";
+    Mix_Chunk* audiob = Mix_LoadWAV(trackb);
+    if(!audiob) {
+        std::cerr << "Failed to load TrackB! SDL_mixer Error: " << Mix_GetError() << std::endl;
+        return 1;
+    }
+    const char* trackc = "/Users/lucapetrosso/Repos/SDL2-CPM-CMake-Example/assets/SDLTrackC.wav";
+    Mix_Chunk* audioc = Mix_LoadWAV(trackc);
+    if(!audioc) {
+        std::cerr << "Failed to load TrackC! SDL_mixer Error: " << Mix_GetError() << std::endl;
+        return 1;
+    }
+    const char* trackd = "/Users/lucapetrosso/Repos/SDL2-CPM-CMake-Example/assets/SDLTrackD.wav";
+    Mix_Chunk* audiod = Mix_LoadWAV(trackd);
+    if(!audiod) {
+        std::cerr << "Failed to load TrackD! SDL_mixer Error: " << Mix_GetError() << std::endl;
+        return 1;
+    }
+
+    const char* tracke = "/Users/lucapetrosso/Repos/SDL2-CPM-CMake-Example/assets/SDLTrackE.wav";
+    Mix_Chunk* audioe = Mix_LoadWAV(tracke);
+    if(!audioe) {
+        std::cerr << "Failed to load TrackE! SDL_mixer Error: " << Mix_GetError() << std::endl;
+        return 1;
+    }
+
+    if (Mix_PlayChannel(0, audioa, -1) == -1){
+        std::cerr << "Failed to play audioa! SDL_mixer Error: " << Mix_GetError() << std::endl;
+        return 1;
+    }
+
+    if (Mix_PlayChannel(1, audiob, -1) == -1){
+        std::cerr << "Failed to play audiob! SDL_mixer Error: " << Mix_GetError() << std::endl;
+        return 1;
+    }
+
+    if (Mix_PlayChannel(2, audioc, -1) == -1){
+        std::cerr << "Failed to play audioc! SDL_mixer Error: " << Mix_GetError() << std::endl;
+        return 1;
+    }
+
+    if (Mix_PlayChannel(3, audiod, -1) == -1){
+        std::cerr << "Failed to play audiod! SDL_mixer Error: " << Mix_GetError() << std::endl;
+        return 1;
+    }
+
+    if (Mix_PlayChannel(4, audioe, -1) == -1){
+        std::cerr << "Failed to play audioe! SDL_mixer Error: " << Mix_GetError() << std::endl;
+        return 1;
+    }
+    /*while (Mix_Playing(-1) != 0){
+        SDL_Delay(100);
+    }*/
 
     auto width = 1280;
     auto height = 720;
@@ -95,6 +173,8 @@ int main(int argc, char* argv[]) {
     // Our state
     bool show_demo_window = true;
     bool show_another_window = false;
+    bool isAudioPlaying = false;
+    int panState = 0;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
     // Main loop
@@ -133,6 +213,99 @@ int main(int argc, char* argv[]) {
         ImGui_ImplSDLRenderer_NewFrame();
         ImGui_ImplSDL2_NewFrame();
         ImGui::NewFrame();
+
+
+        static int channela_value = 0;
+        static int channelb_value = 0;
+        static int channelc_value = 0;
+        static int channeld_value = 0;
+        static int channele_value = 0;
+
+        if (isAudioPlaying) {
+            if (ImGui::Button("Pause Audio")) {
+                Mix_Pause(-1); // Pause all channels
+                isAudioPlaying = false;
+            }
+        } else {
+            if (ImGui::Button("Play Audio")) {
+                Mix_Resume(-1); // Resume all paused channels
+                isAudioPlaying = true;
+            }
+        }
+        //initializes all sliders
+        ImGui::VSliderInt("##intv1", ImVec2(18, 160), &channela_value, 0, 5);
+        Mix_Volume(0, channela_value * MIX_MAX_VOLUME / 5);
+        ImGui::SameLine();
+        ImGui::VSliderInt("##intv2", ImVec2(18, 160), &channelb_value, 0, 5);
+        Mix_Volume(1, channelb_value * MIX_MAX_VOLUME / 5);
+        ImGui::SameLine();
+        ImGui::VSliderInt("##intv3", ImVec2(18, 160), &channelc_value, 0, 5);
+        Mix_Volume(2, channelc_value * MIX_MAX_VOLUME / 5);
+        ImGui::SameLine();
+        ImGui::VSliderInt("##intv4", ImVec2(18, 160), &channeld_value, 0, 5);
+        Mix_Volume(3, channeld_value * MIX_MAX_VOLUME / 5);
+        ImGui::SameLine();
+        ImGui::VSliderInt("##intv5", ImVec2(18, 160), &channele_value, 0, 5);
+        Mix_Volume(4, channele_value * MIX_MAX_VOLUME / 5);
+
+        if (ImGui::Button(getButtonLabel(panState).c_str())) {
+            // Button was clicked, change the pan state
+            panState = (panState + 1) % 3;
+
+            // Apply audio panning based on panState (use SDL_Mixer API to set panning)
+            switch (panState) {
+                case 0:
+                    // Set audio to center pan
+                    // SDL_Mixer API usage: Mix_SetPanning(channel, left, right);
+                    Mix_SetPanning(-1, 255, 255);
+                    break;
+                case 1:
+                    // Set audio to full left pan
+                    Mix_SetPanning(-1, 255, 0);
+                    break;
+                case 2:
+                    // Set audio to full right pan
+                    Mix_SetPanning(-1, 0, 255);
+                    break;
+            }
+        }
+        //raises and lowers all tracks
+        if (ImGui::Button("Raise All")){
+            channela_value++;
+            channelb_value++;
+            channelc_value++;
+            channeld_value++;
+            channele_value++;
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Lower All")){
+            channela_value--;
+            channelb_value--;
+            channelc_value--;
+            channeld_value--;
+            channele_value--;
+        } // Keeps the values from going past set limit
+        if (channela_value >= 6)
+            channela_value--;
+        if (channela_value <= -1)
+            channela_value++;
+        if (channelb_value >= 6)
+            channelb_value--;
+        if (channelb_value <= -1)
+            channelb_value++;
+        if (channelc_value >= 6)
+            channelc_value--;
+        if (channelc_value <= -1)
+            channelc_value++;
+        if (channeld_value >= 6)
+            channeld_value--;
+        if (channeld_value <= -1)
+            channeld_value++;
+        if (channele_value >= 6)
+            channele_value--;
+        if (channele_value <= -1)
+            channele_value++;
+
 
         // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
         if (show_demo_window)
@@ -192,6 +365,8 @@ int main(int argc, char* argv[]) {
     }
 
     // Cleanup
+    Mix_FreeChunk(audioa);
+    Mix_CloseAudio();
     ImGui_ImplSDLRenderer_Shutdown();
     ImGui_ImplSDL2_Shutdown();
     ImGui::DestroyContext();

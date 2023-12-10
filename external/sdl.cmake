@@ -71,20 +71,37 @@ string(TIMESTAMP AFTER "%s")
 math(EXPR DELTASDL_image "${AFTER} - ${BEFORE}")
 MESSAGE(STATUS "SDL_image TIME: ${DELTASDL_image}s")
 
-#
-### SDL_mixer
-#string(TIMESTAMP BEFORE "%s")
-#CPMAddPackage(GITHUB_REPOSITORY libsdl-org/SDL_mixer
-#        GIT_TAG release-2.6.2
-#        OPTIONS
-#        "SDL2MIXER_INSTALL OFF"
-#        "SDL2MIXER_VENDORED ON"
-#        "SDL2MIXER_SAMPLES OFF"
-#        "SDL2MIXER_BUILD_SHARED_LIBS OFF"
+
+## SDL_mixer
+string(TIMESTAMP BEFORE "%s")
+CPMAddPackage(GITHUB_REPOSITORY libsdl-org/SDL_mixer
+        GIT_TAG release-2.6.2
+        OPTIONS
+        "SDL2MIXER_INSTALL OFF"
+        "SDL2MIXER_VENDORED ON"
+        "SDL2MIXER_SAMPLES OFF"
+        "SDL2MIXER_BUILD_SHARED_LIBS OFF"
+)
+find_package(SDL_mixer REQUIRED)
+include_directories(${SDL_mixer_SOURCE_DIR}/include)
+string(TIMESTAMP AFTER "%s")
+math(EXPR DELTASDL_mixer "${AFTER} - ${BEFORE}")
+MESSAGE(STATUS "SDL_mixer TIME: ${DELTASDL_mixer}s")
+
+#CPMAddPackage(
+#        NAME SDL2_mixer
+#        VERSION 2.6.2
+#        URL https://libsdl.org/projects/SDL_mixer/release/SDL2_mixer-2.6.2.zip
+#        DOWNLOAD_ONLY TRUE
 #)
-#find_package(SDL_mixer REQUIRED)
-#include_directories(${SDL_mixer_SOURCE_DIR}/include)
-#string(TIMESTAMP AFTER "%s")
-#math(EXPR DELTASDL_mixer "${AFTER} - ${BEFORE}")
-#MESSAGE(STATUS "SDL_mixer TIME: ${DELTASDL_mixer}s")
+#
+#if (SDL2_mixer_ADDED)
+#    # quick and dirty target definitions
+#    # might need extra configuration and install commands to work properly
+#    file(GLOB SDL2_mixer_SOURCES "${SDL2_mixer_SOURCE_DIR}/*.c")
+#    add_library(SDL2_mixer ${SDL2_mixer_SOURCES})
+#    target_link_libraries(SDL2_mixer SDL2::SDL2)
+#    target_include_directories(SDL2_mixer PUBLIC ${SDL2_mixer_SOURCE_DIR})
+#endif()
+
 ENDIF()
